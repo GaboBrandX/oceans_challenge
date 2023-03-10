@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Oceans.Exercise
@@ -36,9 +37,21 @@ namespace Oceans.Exercise
         {
             get
             {
-                //Use LINQ to get the right number
-                return Subscriptions.Select(_ => 0).FirstOrDefault();
+                var today = DateTime.Now;
+                if (Subscriptions == null || !Subscriptions.Any())
+                {
+                    return 0;
+                }
+
+                return Subscriptions.Where(subscription => IsSubscriptionExpired(subscription, today)).Count();
             }
+        }
+
+        private static bool IsSubscriptionExpired(Subscription subscription, DateTime today)
+        {
+            var lastDayOfExpirationMonth = DateTime.DaysInMonth(subscription.ExpirationYear, subscription.ExpirationMonth);
+            var expirationDate = new DateTime(subscription.ExpirationYear, subscription.ExpirationMonth, lastDayOfExpirationMonth, 23, 59, 59);
+            return DateTime.Now > expirationDate;
         }
 
         /// <summary>
@@ -57,9 +70,10 @@ namespace Oceans.Exercise
         /// <summary>
         /// Rewrite this method to return a tuple of Name, PaymentType and the local variable
         /// </summary>
-        public void UserInformation()
+        public (string name, PaymentType paymentType, bool codeExperts) UserInformation()
         {
             bool codeExperts = true;
+            return (Name, PaymentType, codeExperts);
         }
 
         /// <summary>
@@ -72,7 +86,9 @@ namespace Oceans.Exercise
             bool codeExpertsFromTuple = false;
 
             //deconstruct the tuple
-            UserInformation();
+            var values = UserInformation();
+            nameFromTuple = values.name;
+            codeExpertsFromTuple = values.codeExperts;
 
             if (codeExpertsFromTuple)
             {
